@@ -19,6 +19,7 @@ class PostForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
         # Показываем только опубликованные категории и местоположения
         # Если нет опубликованных, показываем все (для случая, когда админ еще не опубликовал)
         published_categories = Category.objects.filter(is_published=True)
@@ -41,12 +42,18 @@ class PostForm(forms.ModelForm):
         self.fields['location'].required = False
         self.fields['location'].empty_label = "Выберите местоположение (необязательно)"
         
-        # Устанавливаем значение по умолчанию для даты публикации (текущее время)
-        if not self.instance.pk:  # Только при создании нового поста
+        # Обработка поля pub_date для datetime-local input
+        if self.instance.pk:  # При редактировании существующего поста
+            if self.instance.pub_date:
+                # Конвертируем в локальное время и правильный формат
+                local_time = timezone.localtime(self.instance.pub_date)
+                formatted_time = local_time.strftime('%Y-%m-%dT%H:%M')
+                self.initial['pub_date'] = formatted_time
+        else:  # При создании нового поста
             now = timezone.now()
-            # Форматируем для datetime-local input
-            local_time = now.strftime('%Y-%m-%dT%H:%M')
-            self.fields['pub_date'].initial = local_time
+            local_time = timezone.localtime(now)
+            formatted_time = local_time.strftime('%Y-%m-%dT%H:%M')
+            self.initial['pub_date'] = formatted_time
 
 
 class CommentForm(forms.ModelForm):
