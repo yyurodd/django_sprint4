@@ -150,6 +150,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
+    pk_url_kwarg = 'post_id' 
     
     def test_func(self):
         post = self.get_object()
@@ -163,10 +164,11 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse('blog:post_detail', kwargs={'post_id': self.object.pk})
 
 
-
+# CBV для удаления поста
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
-    template_name = 'blog/create.html'  
+    template_name = 'blog/create.html'
+    pk_url_kwarg = 'post_id'
     
     def test_func(self):
         post = self.get_object()
@@ -244,3 +246,4 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse('blog:profile', kwargs={'username': self.request.user.username})
+    
